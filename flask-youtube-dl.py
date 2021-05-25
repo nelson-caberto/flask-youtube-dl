@@ -1,18 +1,24 @@
 from flask import Flask, request
-import os
+import os, json
 
 app = Flask(__name__)
 
+queue = {}
+
 @app.route('/')
 def main():
-    return "starter code"
+    return json.dumps(queue)
 
 @app.route('/<site>', methods=['GET'])
 def add(site):
-    filepath = os.path.join(site,request.args['filepath'])
-    filename = request.args['filename']
-    url = request.args['url']
-    return f'added {filename}'
+    if site not in queue:
+        queue[site] = []
+    queue[site].append({
+        'filepath': os.path.join(site,request.args['filepath']),
+        'filename': request.args['filename'],
+        'url': request.args['url']
+    })
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 if __name__ == "__main__":
     app.run(debug=True)
